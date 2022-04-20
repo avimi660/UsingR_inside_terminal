@@ -1,3 +1,4 @@
+```
 # UsingR_inside_terminal
 # now I need to load R by typing R in the command line 
  R
@@ -44,3 +45,90 @@ zero_gene_matches <- results_table_tidyverse %>% filter(X2==0)
 # writing them out to a txt file so they are saved in the directory 
 write_delim(multilple_gene_matches,"multiple_gene_matches.txt",delim=" ",col_names=FALSE)
 write_delim(zero_gene_matches,"zero_gene_matches.txt",delim=" ",col_names=FALSE)
+
+
+## some R stuff from 12th april using R to generate some tables and then loading into blast to search some stuff
+module load R/4.1.0-gimkl-2020a
+
+ 
+
+Type R to load R:
+
+ 
+
+library(tidyverse)
+
+ 
+
+results_table_tidyverse <- read_delim("results_matches.txt",delim=" ",col_names=FALSE)
+
+ 
+
+multiple_gene_matches <- results_table_tidyverse %>% filter(X2>1)
+
+ 
+
+zero_gene_matches <- results_table_tidyverse %>% filter(X2==0)
+
+ 
+
+write_delim(multiple_gene_matches, "multiple_gene_matches.txt", delim=" ",col_names=FALSE)
+
+ 
+
+write_delim(zero_gene_matches, "zero_gene_matches.txt", delim=" ",col_names=FALSE)
+
+ 
+
+q()
+
+ 
+
+# Starting to build code to figure this out. We will be working through our zero_matches file.
+
+zero_matches_total_lines=`wc -l zero_gene_matches.txt | awk '{ print $1 }'`
+
+ 
+
+for zero_match_line in `seq 1 1 $zero_matches_total_lines`; do echo $zero_match_line; done
+
+ 
+
+zero_match_line=1
+
+ 
+
+gene_search_term=`head -n $zero_match_line zero_gene_matches.txt | tail -n 1 | awk '{ print $1 }'`
+
+ 
+
+grep "gene="$gene_search_term";" GCF_000001405.39_GRCh38.p13_genomic.gff  | grep $'\t'CDS$'\t' | cut -f1,4,5 > temp_human.gff
+
+ 
+
+ 
+
+# Bedtools is 0 based, gff are 1-based. Is bedtools smart enough to go: hey you are using a gff I’ll automatically adjust that for you.
+
+ 
+
+module load BEDTools/2.29.2-GCC-9.2.0
+
+ 
+
+bedtools getfasta -fi GCF_000001405.39_GRCh38.p13_genomic.fna -bed temp_human.gff > temp_human.fna
+
+ 
+
+# We did all of the the possum genome indexing on the 1st April so we do not need to do it again
+
+word size = 11, expect value = 0.05, match/mismatch scores 2/-3, gapcosts 5,2 blastn
+
+ 
+
+module load BLAST/2.12.0-GCC-9.2.0
+
+ 
+
+blastn -task blastn -db GCF_011100635.1_mTriVul1.pri_genomic.fna -query temp_human.fna -evalue 0.05 -word_size 11 -gapopen 5 -gapextend 2 -penalty -3 -reward 2 -outfmt 6
+
