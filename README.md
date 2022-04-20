@@ -132,3 +132,41 @@ module load BLAST/2.12.0-GCC-9.2.0
 
 blastn -task blastn -db GCF_011100635.1_mTriVul1.pri_genomic.fna -query temp_human.fna -evalue 0.05 -word_size 11 -gapopen 5 -gapextend 2 -penalty -3 -reward 2 -outfmt 6
 
+
+Trouble shooting our weird grep message, which has appeared below the gene: MAOB
+
+ 
+
+Line 381
+
+ 
+
+mito_line=381
+
+ 
+
+# Cool – added some new stuff to our loop to account for square brackets in the grep format. And then went on to redoing blast stuff
+
+ 
+
+# This is changed from yesterday because Bedtools can handle gff format so we don’t need to get rid of all the other columns
+
+grep "gene="$gene_search_term";" GCF_000001405.39_GRCh38.p13_genomic.gff  | grep $'\t'CDS$'\t' > temp_human.gff
+
+ 
+
+Followed commands the same way as yesterday, but modified the blast command to save things into a file called temp.blast
+
+ blastn -task blastn -db GCF_011100635.1_mTriVul1.pri_genomic.fna -query temp_human.fna -evalue 0.05 -word_size 11 -gapopen 5 -gapextend 2 -penalty -3 -reward 2 -outfmt 6 > temp.blast
+
+ 
+
+R
+
+library(tidyverse)
+temp_blast <- read_delim("temp.blast",delim="\t",col_names=FALSE)
+
+temp_blast %>% group_by(X1,X2) %>% summarise(sum_match=sum(X8)) %>% pivot_wider(names_from=X2,values_from=sum_match
+
+ 
+
