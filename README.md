@@ -102,7 +102,7 @@ gene_search_term=`head -n $zero_match_line zero_gene_matches.txt | tail -n 1 | a
 
  
 
-grep "gene="$gene_search_term";" GCF_000001405.39_GRCh38.p13_genomic.gff  | grep $'\t'CDS$'\t' | cut -f1,4,5 > temp_human.gff
+grep "gene="$gene_search_term";" GCF_000001405.39_GRCh38.p13_genomic.gff  | grep $'\t'CDS$'\t' > temp_human.gff
 
  
 
@@ -166,7 +166,6 @@ R
 library(tidyverse)
 temp_blast <- read_delim("temp.blast",delim="\t",col_names=FALSE)
 
-temp_blast %>% group_by(X1,X2) %>% summarise(sum_match=sum(X8)) %>% pivot_wider(names_from=X2,values_from=sum_match
 
  
-
+temp_blast %>% group_by(X1,X2) %>% summarise(sum_match=sum(X8)) %>% pivot_wider(names_from=X2,values_from=sum_match)
